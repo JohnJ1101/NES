@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>NES Emulator</title>
+	<meta name='apple-mobile-web-app-capable' content='yes' />
+	<meta name='apple-mobile-web-app-title' content='NES' />
+	<meta name='mobile-web-app-capable' content='yes' />
+	<link rel='favicon' href='icon146.png' />
+	<link rel='shortcut icon' href='icon146.png' />
+	<link rel='icon' href='icon146.png' />
+	<link rel='apple-touch-icon' href='icon146.png' />
+	<style>
+		*{
+			text-align: center;
+			padding:0;margin:0;
+			overflow:hidden;
+		}
+		#controller{
+			position: absolute;
+			bottom: 0;
+			height: 40%;
+			width: 100%;
+			left: 0;
+			right: 0;
+			background: #111;
+			background-size: 100% 100%
+		}
+		.btn{
+			position: absolute;
+			border: none;
+			background: #F00;
+			color: #FFF;
+			border-radius: 100%;
+			width: 8vh;
+			height: 8vh;
+		}
+		#btn_a{
+			right: 11%;
+			bottom: 21%;
+		}
+		#btn_b{
+			right: 24%;
+			bottom: 21%;
+		}
+		.btn2{
+			position: absolute;
+			border: none;
+			background: #333;
+			color: #FFF;
+			border-radius: 100%;
+			width: 8vh;
+			height: 3vh;
+		}
+		#btn_st{
+			left: 47%;
+			bottom: 24%;
+		}
+		#btn_se{
+			left: 35%;
+			bottom: 24%;
+		}
+		.dpad{
+			position: absolute;
+			background: #222;
+			width: 6vh;
+			height: 6.3vh;
+			border: none;
+			color: #FFF;
+		}
+		#dpad_w{
+			left: 9vh;
+			top: 14.1vh;
+		}
+		#dpad_s{
+			left: 9vh;
+			bottom: 7.1vh;
+		}
+		#dpad_a{
+			left: 4vh;
+			top: 20.55vh;
+		}
+		#dpad_d{
+			left: 14vh;
+			top: 20.55vh;
+		}
+		#dpad_center{
+			width:6.4vh;
+			height:6.4vh;
+			left:9vh;
+			top:20.4vh;
+		}
+		body{
+			background: #070707;
+		}
+		#neslabel{
+			position:absolute;
+			left:39.9vw;
+			color: #999;
+		}
+		.nes-screen{
+			width: auto;
+			height:53vh;
+		}
+		.ctrls{
+			border-radius: 8px; padding: 8px; color: #FFF; background: #333;
+		}
+	</style>
+</head>
+<body>
+    <script src="lib/jquery-1.4.2.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="lib/dynamicaudio-min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/nes.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/utils.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/cpu.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/keyboard.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/mappers.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/papu.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/ppu.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/rom.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/ui.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+
+        var nes;
+         $(function() {
+            nes = new JSNES({
+                'ui': $('#emulator').JSNESUI({
+                    "Simultaneous Multiplayer": [
+                        ['Bubble Bobble', 'local-roms/Bubble Bobble (USA).nes'],
+                        ['Mario Bros. (World)', 'local-roms/Mario Bros. (World).nes'],
+                        ['Dr. Mario (Japan, USA)', 'local-roms/Dr. Mario (Japan, USA).nes'],
+                        ['Yoshi (USA)', 'local-roms/Yoshi (USA).nes'],
+                        ['Yoshi\'s Cookie (USA)', 'local-roms/Yoshi\'s Cookie (USA).nes']
+                    ],
+                    "Turn-based Multiplayer": [
+                        ['Super Mario Bros. (Japan, USA)', 'local-roms/Super Mario Bros. (Japan, USA).nes'],
+                        ['Super Mario Bros. 3 (USA)', 'local-roms/Super Mario Bros. 3 (USA).nes']
+                    ],
+                    "Singleplayer": [
+                        ['Super Mario Bros. 2 (USA)', 'local-roms/Super Mario Bros. 2 (USA).nes'],
+                        ['Dragon Warrior (USA)', 'local-roms/Dragon Warrior (USA).nes'],
+                        ['Legend of Zelda, The (USA)', 'local-roms/Legend of Zelda, The (USA).nes'],
+                        ['Bomberman (USA)', 'local-roms/Bomberman (USA).nes'],
+                        ['Tetris (USA)', 'local-roms/Tetris (USA).nes'],
+                        ['Super Mario Bros 3. Mix (ROMHACK/USA)', 'local-roms/Super Mario Bros 3. Mix (ROMHACKED).nes']
+                    ],
+                    "Debugging": [
+                    	['Controller Test (USA)', 'local-roms/Controller Test (USA).nes']
+                    ]
+                })
+            });
+
+         });
+
+        function pressBTN(e, id, boolean, c){
+            if(e) e.preventDefault();
+            eval("nes.keyboard.state"+(1+(c||0))+"[nes.keyboard.keys."+id+"] = "+boolean)
+        }
+        window.ontouchmove = function(e){e.preventDefault();}
+        window.onload = function(){
+
+        	/*Use something like jsbeautifier*/
+
+        	/*Start button*/document.getElementById('btn_st').addEventListener('mousedown',function(e){pressBTN(e,"KEY_START",!0,0)});document.getElementById('btn_st').addEventListener('mouseup',function(e){pressBTN(e,"KEY_START",!1,0)});document.getElementById('btn_st').addEventListener('touchdown',function(e){pressBTN(e,"KEY_START",!0,0)});document.getElementById('btn_st').addEventListener('touchup',function(e){pressBTN(e,"KEY_START",!1,0)});/*Select button*/document.getElementById('btn_se').addEventListener('mousedown',function(e){pressBTN(e,"KEY_SELECT",!0,0)});document.getElementById('btn_se').addEventListener('mouseup',function(e){pressBTN(e,"KEY_SELECT",!1,0)});document.getElementById('btn_se').addEventListener('touchdown',function(e){pressBTN(e,"KEY_SELECT",!0,0)});document.getElementById('btn_se').addEventListener('touchup',function(e){pressBTN(e,"KEY_SELECT",!1,0)});/*Up button*/document.getElementById('dpad_w').addEventListener('mousedown',function(e){pressBTN(e,"KEY_UP",!0,0)});document.getElementById('dpad_w').addEventListener('mouseup',function(e){pressBTN(e,"KEY_UP",!1,0)});document.getElementById('dpad_w').addEventListener('touchdown',function(e){pressBTN(e,"KEY_UP",!0,0)});document.getElementById('dpad_w').addEventListener('touchup',function(e){pressBTN(e,"KEY_UP",!1,0)});/*Down button*/document.getElementById('dpad_s').addEventListener('mousedown',function(e){pressBTN(e,"KEY_DOWN",!0,0)});document.getElementById('dpad_s').addEventListener('mouseup',function(e){pressBTN(e,"KEY_DOWN",!1,0)});document.getElementById('dpad_s').addEventListener('touchdown',function(e){pressBTN(e,"KEY_DOWN",!0,0)});document.getElementById('dpad_s').addEventListener('touchup',function(e){pressBTN(e,"KEY_DOWN",!1,0)});/*Left button*/document.getElementById('dpad_a').addEventListener('mousedown',function(e){pressBTN(e,"KEY_LEFT",!0,0)});document.getElementById('dpad_a').addEventListener('mouseup',function(e){pressBTN(e,"KEY_LEFT",!1,0)});document.getElementById('dpad_a').addEventListener('touchdown',function(e){pressBTN(e,"KEY_LEFT",!0,0)});document.getElementById('dpad_a').addEventListener('touchup',function(e){pressBTN(e,"KEY_LEFT",!1,0)});/*Right button*/document.getElementById('dpad_d').addEventListener('mousedown',function(e){pressBTN(e,"KEY_RIGHT",!0,0)});document.getElementById('dpad_d').addEventListener('mouseup',function(e){pressBTN(e,"KEY_RIGHT",!1,0)});document.getElementById('dpad_d').addEventListener('touchdown',function(e){pressBTN(e,"KEY_RIGHT",!0,0)});document.getElementById('dpad_d').addEventListener('touchup',function(e){pressBTN(e,"KEY_RIGHT",!1,0)});
+
+        	/*A button*/document.getElementById('btn_a').addEventListener('mousedown',function(e){pressBTN(e,"KEY_A",!0,0)});document.getElementById('btn_a').addEventListener('mouseup',function(e){pressBTN(e,"KEY_A",!1,0)});document.getElementById('btn_a').addEventListener('touchdown',function(e){pressBTN(e,"KEY_A",!0,0)});document.getElementById('btn_a').addEventListener('touchup',function(e){pressBTN(e,"KEY_A",!1,0)});/*B button*/document.getElementById('btn_b').addEventListener('mousedown',function(e){pressBTN(e,"KEY_B",!0,0)});document.getElementById('btn_b').addEventListener('mouseup',function(e){pressBTN(e,"KEY_B",!1,0)});document.getElementById('btn_b').addEventListener('touchdown',function(e){pressBTN(e,"KEY_B",!0,0)});document.getElementById('btn_b').addEventListener('touchup',function(e){pressBTN(e,"KEY_B",!1,0)});
+        }
+    
+    </script>
+    <div id='emulator' style='width: 100vw; height: 59vh;'></div>
+	<div id='controller'>
+		<button id='dpad_center' class='dpad'>o</button>
+		<button id='dpad_w' class='dpad'>&uparrow;</button>
+		<button id='dpad_s' class='dpad'>&downarrow;</button>
+		<button id='dpad_a' class='dpad'>&leftarrow;</button>
+		<button id='dpad_d' class='dpad'>&rightarrow;</button>
+		<span id='neslabel'><br/>NES Emulator<br/>By Lazy.DevTeam<br/><span id='ctrls'>Keyboard Controls: <br/>- Start: Enter<br/>- Select: Control Key<br/>- D-PAD: Arrow keys<br/>- A: X<br/>- B: Z</span></span>
+		<button id='btn_se' class='btn2'>Select</button>
+		<button id='btn_st' class='btn2''>Start</button>
+		<button id='btn_a' class='btn'>A</button>
+		<button id='btn_b' class='btn'>B</button>
+	</div>
+</body>
+</html>
